@@ -2,25 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUpdateProjetoRequest;
-use App\Projetos;
+use App\Http\Requests\StoreUpdateSobreRequest;
+use App\Sobre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class ProjetoController extends Controller
+class SobreController extends Controller
 {
-    protected $request;
-    private $repository;
 
-    public function __construct(Request $request, Projetos $projeto)
+    public function __construct(Request $request, Sobre $sobre)
     {
         //dd($request->prm1);
         $this->request = $request;
-        $this->repository = $projeto;
+        $this->repository = $sobre;
         //$this->middleware("auth")->only(['create','storage']);
         //$this->middleware("auth")->except('index');
     }
-
     /**
      * Display a listing of the resource.
      *
@@ -28,10 +25,10 @@ class ProjetoController extends Controller
      */
     public function index()
     {
-        $projetos = Projetos::paginate(20);
+        $sobre = Sobre::paginate(20);
 
-        return view('admin.pages.projetos.index',[
-            'projetos' => $projetos
+        return view('admin.pages.sobre.index',[
+            'sobre' => $sobre
         ]);
     }
 
@@ -42,7 +39,7 @@ class ProjetoController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.projetos.create');
+        return view('admin.pages.sobre.create');
     }
 
     /**
@@ -51,18 +48,18 @@ class ProjetoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUpdateProjetoRequest $request)
+    public function store(StoreUpdateSobreRequest $request)
     {
-        $data = $request->only('nome', 'descricao', 'link');
+        $data = $request->only('titulo', 'mensagem');
 
         if($request->hasFile('foto') && $request->file('foto')->isValid()){
-            $image_path = ($request->file('foto')->store('projetos'));
+            $image_path = ($request->file('foto')->store('sobre'));
             $data['imagem'] = $image_path;
         }
         $data['status'] = 'A'; 
         $this->repository->create($data);
 
-        return redirect()->route('projetos.index');
+        return redirect()->route('sobre.index');
     }
 
     /**
@@ -73,12 +70,12 @@ class ProjetoController extends Controller
      */
     public function show($id)
     {
-        $projetos =  $this->repository->find($id);
-        if(!$projetos){
+        $sobre =  $this->repository->find($id);
+        if(!$sobre){
             return redirect()->back();
         }
-        return view('admin.pages.projetos.show',[
-            'projetos' => $projetos
+        return view('admin.pages.sobre.show',[
+            'sobre' => $sobre
         ]);
     }
 
@@ -90,13 +87,13 @@ class ProjetoController extends Controller
      */
     public function edit($id)
     {
-        $projeto =  $this->repository->find($id);
-        if(!$projeto){
+        $sobre =  $this->repository->find($id);
+        if(!$sobre){
             return redirect()->back();
         }
 
-        return view("admin.pages.projetos.edit", [
-            'projeto' => $projeto
+        return view("admin.pages.sobre.edit", [
+            'sobre' => $sobre
         ]);
     }
 
@@ -107,63 +104,63 @@ class ProjetoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreUpdateProjetoRequest $request, $id)
+    public function update(StoreUpdateSobreRequest $request, $id)
     {
-        $projeto =  $this->repository->find($id);
-        if(!$projeto){
+        $sobre =  $this->repository->find($id);
+        if(!$sobre){
             return redirect()->back();
         }
 
-        $data = $request->only('nome', 'descricao', 'link');
+        $data = $request->only('titulo', 'mensagem');
 
         if($request->hasFile('foto') && $request->file('foto')->isValid()){
 
-            if($projeto->imagem && Storage::exists($projeto->imagem)){
-                Storage::delete($projeto->imagem);
+            if($sobre->imagem && Storage::exists($sobre->imagem)){
+                Storage::delete($sobre->imagem);
             }
 
-            $image_path = ($request->file('foto')->store('projetos'));
+            $image_path = ($request->file('foto')->store('sobre'));
             $data['imagem'] = $image_path;
         }
 
-        $projeto->update($data);
-        return redirect()->route('projetos.index');
+        $sobre->update($data);
+        return redirect()->route('sobre.index');
     }
 
     public function desactive(Request $request, $id)
     {
-        $product =  $this->repository->find($id);
-        if(!$product){
+        $sobre =  $this->repository->find($id);
+        if(!$sobre){
             return redirect()->back();
         }
 
         $data["status"] = "I";
 
-        $product->update($data);
-        return redirect()->route('projetos.index');
+        $sobre->update($data);
+        return redirect()->route('sobre.index');
     }
 
     public function active(Request $request, $id)
     {
-        $product =  $this->repository->find($id);
-        if(!$product){
+        $sobre =  $this->repository->find($id);
+        if(!$sobre){
             return redirect()->back();
         }
 
         $data["status"] = "A";
 
-        $product->update($data);
-        return redirect()->route('projetos.index');
+        $sobre->update($data);
+        return redirect()->route('sobre.index');
     }
 
     public function search (Request $request){
 
         $filters = $request->except('_token');
 
-        $projetos = $this->repository->search($request->filter);
+        $sobre = $this->repository->search($request->filter);
 
-        return view('admin.pages.projetos.index',[
-            'projetos' => $projetos,
+        return view('admin.pages.sobre.index',[
+            'sobre' => $sobre,
             'filters' => $filters
         ]);
 

@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUpdateProjetoRequest;
-use App\Projetos;
+use App\Contatos;
+use App\Http\Requests\StoreUpdateContatoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class ProjetoController extends Controller
+class ContatoController extends Controller
 {
-    protected $request;
-    private $repository;
 
-    public function __construct(Request $request, Projetos $projeto)
+    public function __construct(Request $request, Contatos $projeto)
     {
         //dd($request->prm1);
         $this->request = $request;
@@ -20,7 +18,6 @@ class ProjetoController extends Controller
         //$this->middleware("auth")->only(['create','storage']);
         //$this->middleware("auth")->except('index');
     }
-
     /**
      * Display a listing of the resource.
      *
@@ -28,10 +25,10 @@ class ProjetoController extends Controller
      */
     public function index()
     {
-        $projetos = Projetos::paginate(20);
+        $contatos = Contatos::paginate(20);
 
-        return view('admin.pages.projetos.index',[
-            'projetos' => $projetos
+        return view('admin.pages.contatos.index',[
+            'contatos' => $contatos
         ]);
     }
 
@@ -42,7 +39,7 @@ class ProjetoController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.projetos.create');
+        return view('admin.pages.contatos.create');
     }
 
     /**
@@ -51,18 +48,18 @@ class ProjetoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUpdateProjetoRequest $request)
+    public function store(StoreUpdateContatoRequest $request)
     {
-        $data = $request->only('nome', 'descricao', 'link');
+        $data = $request->only('nome', 'link');
 
         if($request->hasFile('foto') && $request->file('foto')->isValid()){
-            $image_path = ($request->file('foto')->store('projetos'));
+            $image_path = ($request->file('foto')->store('contatos'));
             $data['imagem'] = $image_path;
         }
         $data['status'] = 'A'; 
         $this->repository->create($data);
 
-        return redirect()->route('projetos.index');
+        return redirect()->route('contatos.index');
     }
 
     /**
@@ -73,12 +70,12 @@ class ProjetoController extends Controller
      */
     public function show($id)
     {
-        $projetos =  $this->repository->find($id);
-        if(!$projetos){
+        $contatos =  $this->repository->find($id);
+        if(!$contatos){
             return redirect()->back();
         }
-        return view('admin.pages.projetos.show',[
-            'projetos' => $projetos
+        return view('admin.pages.contatos.show',[
+            'contatos' => $contatos
         ]);
     }
 
@@ -90,13 +87,13 @@ class ProjetoController extends Controller
      */
     public function edit($id)
     {
-        $projeto =  $this->repository->find($id);
-        if(!$projeto){
+        $contato =  $this->repository->find($id);
+        if(!$contato){
             return redirect()->back();
         }
 
-        return view("admin.pages.projetos.edit", [
-            'projeto' => $projeto
+        return view("admin.pages.contatos.edit", [
+            'contato' => $contato
         ]);
     }
 
@@ -107,63 +104,63 @@ class ProjetoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreUpdateProjetoRequest $request, $id)
+    public function update(StoreUpdateContatoRequest $request, $id)
     {
-        $projeto =  $this->repository->find($id);
-        if(!$projeto){
+        $contato =  $this->repository->find($id);
+        if(!$contato){
             return redirect()->back();
         }
 
-        $data = $request->only('nome', 'descricao', 'link');
+        $data = $request->only('nome', 'link');
 
         if($request->hasFile('foto') && $request->file('foto')->isValid()){
 
-            if($projeto->imagem && Storage::exists($projeto->imagem)){
-                Storage::delete($projeto->imagem);
+            if($contato->imagem && Storage::exists($contato->imagem)){
+                Storage::delete($contato->imagem);
             }
 
-            $image_path = ($request->file('foto')->store('projetos'));
+            $image_path = ($request->file('foto')->store('contatos'));
             $data['imagem'] = $image_path;
         }
 
-        $projeto->update($data);
-        return redirect()->route('projetos.index');
+        $contato->update($data);
+        return redirect()->route('contatos.index');
     }
 
     public function desactive(Request $request, $id)
     {
-        $product =  $this->repository->find($id);
-        if(!$product){
+        $contato =  $this->repository->find($id);
+        if(!$contato){
             return redirect()->back();
         }
 
         $data["status"] = "I";
 
-        $product->update($data);
-        return redirect()->route('projetos.index');
+        $contato->update($data);
+        return redirect()->route('contatos.index');
     }
 
     public function active(Request $request, $id)
     {
-        $product =  $this->repository->find($id);
-        if(!$product){
+        $contato =  $this->repository->find($id);
+        if(!$contato){
             return redirect()->back();
         }
 
         $data["status"] = "A";
 
-        $product->update($data);
-        return redirect()->route('projetos.index');
+        $contato->update($data);
+        return redirect()->route('contatos.index');
     }
 
     public function search (Request $request){
 
         $filters = $request->except('_token');
 
-        $projetos = $this->repository->search($request->filter);
+        $contatos = $this->repository->search($request->filter);
 
-        return view('admin.pages.projetos.index',[
-            'projetos' => $projetos,
+        return view('admin.pages.contatos.index',[
+            'contatos' => $contatos,
             'filters' => $filters
         ]);
 

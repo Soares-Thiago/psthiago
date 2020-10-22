@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUpdateProjetoRequest;
-use App\Projetos;
+use App\Habilidades;
+use App\Http\Requests\StoreUpdateHabilidadeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class ProjetoController extends Controller
+class HabilidadeController extends Controller
 {
-    protected $request;
-    private $repository;
-
-    public function __construct(Request $request, Projetos $projeto)
+    public function __construct(Request $request, Habilidades $habilidades)
     {
         //dd($request->prm1);
         $this->request = $request;
-        $this->repository = $projeto;
+        $this->repository = $habilidades;
         //$this->middleware("auth")->only(['create','storage']);
         //$this->middleware("auth")->except('index');
     }
@@ -28,10 +25,10 @@ class ProjetoController extends Controller
      */
     public function index()
     {
-        $projetos = Projetos::paginate(20);
+        $habilidades = Habilidades::paginate(20);
 
-        return view('admin.pages.projetos.index',[
-            'projetos' => $projetos
+        return view('admin.pages.habilidades.index',[
+            'habilidades' => $habilidades
         ]);
     }
 
@@ -42,7 +39,7 @@ class ProjetoController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.projetos.create');
+        return view('admin.pages.habilidades.create');
     }
 
     /**
@@ -51,18 +48,18 @@ class ProjetoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUpdateProjetoRequest $request)
+    public function store(StoreUpdateHabilidadeRequest $request)
     {
-        $data = $request->only('nome', 'descricao', 'link');
+        $data = $request->only('tipo','nome');
 
         if($request->hasFile('foto') && $request->file('foto')->isValid()){
-            $image_path = ($request->file('foto')->store('projetos'));
+            $image_path = ($request->file('foto')->store('habilidades'));
             $data['imagem'] = $image_path;
         }
         $data['status'] = 'A'; 
         $this->repository->create($data);
 
-        return redirect()->route('projetos.index');
+        return redirect()->route('habilidades.index');
     }
 
     /**
@@ -73,12 +70,12 @@ class ProjetoController extends Controller
      */
     public function show($id)
     {
-        $projetos =  $this->repository->find($id);
-        if(!$projetos){
+        $habilidades =  $this->repository->find($id);
+        if(!$habilidades){
             return redirect()->back();
         }
-        return view('admin.pages.projetos.show',[
-            'projetos' => $projetos
+        return view('admin.pages.habilidades.show',[
+            'habilidades' => $habilidades
         ]);
     }
 
@@ -90,13 +87,13 @@ class ProjetoController extends Controller
      */
     public function edit($id)
     {
-        $projeto =  $this->repository->find($id);
-        if(!$projeto){
+        $habilidade =  $this->repository->find($id);
+        if(!$habilidade){
             return redirect()->back();
         }
 
-        return view("admin.pages.projetos.edit", [
-            'projeto' => $projeto
+        return view("admin.pages.habilidades.edit", [
+            'habilidade' => $habilidade
         ]);
     }
 
@@ -107,63 +104,63 @@ class ProjetoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreUpdateProjetoRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $projeto =  $this->repository->find($id);
-        if(!$projeto){
+        $habilidade =  $this->repository->find($id);
+        if(!$habilidade){
             return redirect()->back();
         }
 
-        $data = $request->only('nome', 'descricao', 'link');
+        $data = $request->only('tipo','nome', 'link');
 
         if($request->hasFile('foto') && $request->file('foto')->isValid()){
 
-            if($projeto->imagem && Storage::exists($projeto->imagem)){
-                Storage::delete($projeto->imagem);
+            if($habilidade->imagem && Storage::exists($habilidade->imagem)){
+                Storage::delete($habilidade->imagem);
             }
 
-            $image_path = ($request->file('foto')->store('projetos'));
+            $image_path = ($request->file('foto')->store('habilidades'));
             $data['imagem'] = $image_path;
         }
 
-        $projeto->update($data);
-        return redirect()->route('projetos.index');
+        $habilidade->update($data);
+        return redirect()->route('habilidades.index');
     }
 
     public function desactive(Request $request, $id)
     {
-        $product =  $this->repository->find($id);
-        if(!$product){
+        $habilidade =  $this->repository->find($id);
+        if(!$habilidade){
             return redirect()->back();
         }
 
         $data["status"] = "I";
 
-        $product->update($data);
-        return redirect()->route('projetos.index');
+        $habilidade->update($data);
+        return redirect()->route('habilidades.index');
     }
 
     public function active(Request $request, $id)
     {
-        $product =  $this->repository->find($id);
-        if(!$product){
+        $habilidade =  $this->repository->find($id);
+        if(!$habilidade){
             return redirect()->back();
         }
 
         $data["status"] = "A";
 
-        $product->update($data);
-        return redirect()->route('projetos.index');
+        $habilidade->update($data);
+        return redirect()->route('habilidades.index');
     }
 
     public function search (Request $request){
 
         $filters = $request->except('_token');
 
-        $projetos = $this->repository->search($request->filter);
+        $habilidades = $this->repository->search($request->filter);
 
-        return view('admin.pages.projetos.index',[
-            'projetos' => $projetos,
+        return view('admin.pages.habilidades.index',[
+            'habilidades' => $habilidades,
             'filters' => $filters
         ]);
 
